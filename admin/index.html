@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blog Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #1e1e1e;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    .admin, .blog {
+      flex: 1 1 350px;
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 8px;
+    }
+
+    .admin h2, .blog h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #333;
+      padding-bottom: 0.5rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      border: none;
+      background: #333;
+      color: #fff;
+    }
+
+    button {
+      padding: 0.6rem 1.2rem;
+      background: orangered;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: orange;
+      color: #000;
+    }
+
+    .post {
+      background: #222;
+      padding: 1rem;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .post img {
+      max-height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 0.8rem;
+      width: 100%;
+    }
+
+    .post h3 {
+      margin: 0.5rem 0;
+    }
+
+    .post .date {
+      font-size: 0.8rem;
+      color: #aaa;
+      font-style: italic;
+    }
+
+    .post .controls {
+      margin-top: auto;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    #blogPosts, #messageList {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .visit-count {
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Blog Admin Dashboard</h1>
+    <span class="visit-count">Visits: <span id="visitCount">0</span></span>
+  </header>
+
+  <div class="container">
+    <!-- Blog Post Admin + Messages Below -->
+    <div class="admin">
+      <h2>Add New Post</h2>
+      <input type="text" id="title" placeholder="Post Title">
+      <input type="text" id="image" placeholder="Image URL">
+      <textarea id="content" rows="4" placeholder="Post Content"></textarea>
+      <input type="date" id="date">
+      <button onclick="addPost()">Publish Post</button>
+
+      <h2 style="margin-top: 3rem;">Messages</h2>
+      <div id="messageList"></div>
+    </div>
+
+    <!-- Blog Display -->
+    <div class="blog">
+      <h2>All Blog Posts</h2>
+      <div id="blogPosts"></div>
+    </div>
+  </div>
+
+  <script>
+    let editingIndex = null;
+
+    function trackVisit() {
+      let visits = localStorage.getItem('visits') || 0;
+      visits = parseInt(visits) + 1;
+      localStorage.setItem('visits', visits);
+      document.getElementById('visitCount').textContent = visits;
+    }
+
+    function addPost() {
+      const title = document.getElementById('title').value.trim();
+      const image = document.getElementById('image').value.trim();
+      const content = document.getElementById('content').value.trim();
+      const date = document.getElementById('date').value;
+
+      if (!title || !content || !date || !image) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      let posts = JSON.parse(localStorage.getItem('posts')) || [];
+
+      if (editingIndex !== null) {
+        posts[editingIndex] = { title, image, content, date };
+        editingIndex = null;
+      } else {
+        posts.unshift({ title, image, content, date });
+      }
+
+      localStorage.setItem('posts', JSON.stringify(posts));
+      clearForm();
+      displayPosts();
+    }
+
+    function displayPosts() {
+      const posts = JSON.parse(localStorage.getItem('posts')) || [];
+      const blogDiv = document.getElementById('blogPosts');
+      blogDiv.innerHTML = '';
+
+      posts.forEach((post, index) => {
+        const postDiv = document.createElement('div');
+        postDiv.className = 'post';
+
+        postDiv.innerHTML = `
+          <img src="${post.image}" alt="${post.title}">
+          <h3>${post.title}</h3>
+          <p class="date">${post.date}</p>
+          <p>${post.content}</p>
+          <div class="controls">
+            <button onclick="editPost(${index})">Edit</button>
+            <button style="background:#e63946;" onclick="deletePost(${index})">Delete</button>
+          </div>
+        `;
+
+        blogDiv.appendChild(postDiv);
+      });
+    }
+
+    function deletePost(index) {
+      let posts = JSON.parse(localStorage.getItem('posts')) || [];
+      if (confirm('Are you sure you want to delete this post?')) {
+        posts.splice(index, 1);
+        localStorage.setItem('posts', JSON.stringify(posts));
+        displayPosts();
+      }
+    }
+
+    function editPost(index) {
+      const posts = JSON.parse(localStorage.getItem('posts')) || [];
+      const post = posts[index];
+      document.getElementById('title').value = post.title;
+      document.getElementById('image').value = post.image;
+      document.getElementById('content').value = post.content;
+      document.getElementById('date').value = post.date;
+      editingIndex = index;
+    }
+
+    function clearForm() {
+      document.getElementById('title').value = '';
+      document.getElementById('image').value = '';
+      document.getElementById('content').value = '';
+      document.getElementById('date').value = '';
+    }
+
+    function displayMessages() {
+      const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+      const messageList = document.getElementById('messageList');
+      messageList.innerHTML = '';
+
+      if (messages.length === 0) {
+        messageList.innerHTML = '<p style="color: #aaa;">No messages yet.</p>';
+        return;
+      }
+
+      messages.forEach((msg) => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'post';
+        msgDiv.innerHTML = `
+          <h3>${msg.name}</h3>
+          <p class="date">${msg.date}</p>
+          <p><strong>Email:</strong> ${msg.email}</p>
+          <p>${msg.message}</p>
+        `;
+        messageList.appendChild(msgDiv);
+      });
+    }
+
+    // Init
+    trackVisit();
+    displayPosts();
+    displayMessages();
+  </script>
+</body>
+</html>
