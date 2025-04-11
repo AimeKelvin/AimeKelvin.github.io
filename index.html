@@ -9,13 +9,76 @@
 </head>
 <body>
   <header>
-    <nav>
-      <a href="#work">WORK</a>
-      <a href="#">ABOUT</a>
-      <a href="#">SERVICES</a>
-      <a href="#">CONTACT</a>
-    </nav>
+    <div class="nav-container">
+  
+      <div class="burger" onclick="toggleMenu()">
+        ☰
+      </div>
+  
+      <nav id="navbar">
+        <a href="#work">WORK</a>
+        <a href="#blog">BLOG</a>
+        <a href="#education">EDUCATION</a>
+        <a href="#contact">CONTACT</a>
+      </nav>
+    </div>
   </header>
+  <style>
+    /* General styling */
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  padding: 1rem 2rem;
+}
+
+nav {
+  display: flex;
+  gap: 2rem;
+}
+
+nav a {
+  color: grey;
+  text-decoration: none;
+}
+
+/* Burger styles */
+.burger {
+  display: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .burger {
+    display: block;
+  }
+
+  nav {
+    display: none;
+    flex-direction: column;
+    background: #1e1e1e;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 200px;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  nav.active {
+    display: flex;
+  }
+
+  nav a {
+    padding: 0.5rem 0;
+  }
+}
+
+  </style>
   <section style="padding-bottom: 6vh;">
   <div class="landing-wrapper">
     <div class="left">
@@ -34,7 +97,7 @@
     </div>
   </div>
 </section>
-<section class="projects-section" id="#work" style="padding-bottom:6vh;">
+<section class="projects-section" id="work" style="padding-bottom:6vh;">
     <h1>My Work</h1>
     <div class="projects-container">
   
@@ -279,5 +342,11 @@
       </footer>
       
 
+  <script>
+  function toggleMenu() {
+    const nav = document.getElementById('navbar');
+    nav.classList.toggle('active');
+  }
+</script>
 </body>
 </html>
